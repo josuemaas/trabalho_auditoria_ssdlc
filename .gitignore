@@ -1,0 +1,6 @@
+/database/sistema.sqlite
+/.env
+/vendor/
+.vscode/
+.idea/
+*.log
