@@ -1,0 +1,38 @@
+name: Pipeline SSDLC
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validar-aplicacao:
+    name: Validar aplicação PHP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v6
+
+      - name: Configurar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: pdo_sqlite
+          coverage: none
+
+      - name: Exibir versão do PHP
+        run: php -v
+
+      - name: Verificar sintaxe dos arquivos PHP
+        run: |
+          find . -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Criar banco de dados de teste
+        run: php database/criar_banco.php
+
+      - name: Verificar banco criado
+        run: test -f database/sistema.sqlite
