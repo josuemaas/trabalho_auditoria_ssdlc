@@ -4,18 +4,21 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
 
 jobs:
   validar-aplicacao:
-    name: Validar aplicação PHP
+    name: Validar aplicacao PHP e seguranca
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar código do repositório
-        uses: actions/checkout@v6
+      - name: Baixar codigo do repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configurar PHP
         uses: shivammathur/setup-php@v2
@@ -24,7 +27,7 @@ jobs:
           extensions: pdo_sqlite
           coverage: none
 
-      - name: Exibir versão do PHP
+      - name: Exibir versao do PHP
         run: php -v
 
       - name: Verificar sintaxe dos arquivos PHP
@@ -36,3 +39,8 @@ jobs:
 
       - name: Verificar banco criado
         run: test -f database/sistema.sqlite
+
+      - name: Executar analise SonarQube
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
