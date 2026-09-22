@@ -44,3 +44,26 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  deploy:
+    name: Deploy AWS EC2
+    runs-on: ubuntu-latest
+    needs: validar-aplicacao
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Atualizar aplicacao na EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USER }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          script: |
+            cd /var/www/html
+            sudo git pull origin main
+            sudo php database/criar_banco.php
+            sudo chown -R www-data:www-data /var/www/html/database
+            sudo chmod -R 775 /var/www/html/database
+            sudo apache2ctl configtest
+            sudo systemctl restart apache2
